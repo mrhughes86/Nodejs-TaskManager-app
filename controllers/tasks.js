@@ -1,6 +1,7 @@
 // Functions folder for Routes
 const Task = require('../models/Task')
 const asyncWrapper = require('../middleware/async')
+const {createCustomeError} = require('../errors/custom-errors')
 
 const getAllTasks = asyncWrapper(async (req, res) => {
     const tasks = await Task.find({})
@@ -12,11 +13,11 @@ const createTasks = asyncWrapper( async (req, res) =>{
     res.status(201).json({ task })
 })
 
-const getTasks = asyncWrapper( async (req, res) =>{
+const getTasks = asyncWrapper( async (req, res, next) =>{
     const {id:taskID} = req.params
     const task = await Task.findOne({_id:taskID})
     if(!task){
-      return res.status(404).json({msg: `No task with id: ${taskID}`})
+      return next(createCustomeError(`No task with id: ${taskID}`, 404))
     }
     res.status(200).json({ task })
 })
@@ -28,7 +29,7 @@ const updateTasks = asyncWrapper( async (req, res) =>{
       runValidators: true,
     })
     if(!task){
-      return res.status(404).json({msg: `No task with id: ${taskID}`})
+      return next(createCustomeError(`No task with id: ${taskID}`, 404))
     }
     res.status(200).json({ task })
 })
@@ -38,7 +39,7 @@ const deleteTasks = asyncWrapper( async (req, res) =>{
     const {id:taskID} = req.params
     const task = await Task.findOneAndDelete({_id:taskID})
     if(!task){
-      return res.status(404).json({msg: `No task with id: ${taskID}`})
+      return next(createCustomeError(`No task with id: ${taskID}`, 404))
     }
     res.status(200).json({ task }) 
 })
